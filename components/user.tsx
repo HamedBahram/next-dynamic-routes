@@ -1,14 +1,20 @@
 import Link from 'next/link'
 import Image from 'next/image'
-import { getTodosByUserId, getUserById } from '@/lib/users'
+
 import { cn } from '@/lib/utils'
+import { getTodosByUserId, getUserById } from '@/lib/users'
+import { notFound } from 'next/navigation'
 
 export default async function User({ slug }: { slug: string[] }) {
   const userId = slug[0]
   const todoId = slug[2]
-  const user = await getUserById(userId)
-  const todos = await getTodosByUserId(userId)
-  const todo = todos.find(todo => todo.id === todoId)
+  const { user, error } = await getUserById(userId)
+  if (!user || error) {
+    notFound()
+  }
+
+  const { todos } = await getTodosByUserId(userId)
+  const todo = todos?.find(todo => todo.id === todoId)
 
   return (
     <section className='grow'>
@@ -30,7 +36,7 @@ export default async function User({ slug }: { slug: string[] }) {
         <div className='mt-10 flex flex-col gap-12 lg:flex-row'>
           <ul className='flex list-disc flex-col gap-1 p-8 text-sm'>
             <h3 className='mb-3 border-b pb-3 text-lg font-semibold'>Todos</h3>
-            {todos.map(todo => (
+            {todos?.map(todo => (
               <li key={todo.id} className='list-item list-inside'>
                 <Link
                   href={`/users/${userId}/todos/${todo.id}`}

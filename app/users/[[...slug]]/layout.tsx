@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { notFound } from 'next/navigation'
 
 import { getUsers } from '@/lib/users'
 import { cn } from '@/lib/utils'
@@ -10,7 +11,11 @@ export default async function UsersLayout({
   params: { slug?: string[] }
   children: React.ReactNode
 }) {
-  const users = await getUsers()
+  const { users, error } = await getUsers()
+  if (!users || error) {
+    notFound()
+  }
+
   const { slug } = params
   const userId = slug?.[0]
 
@@ -21,7 +26,7 @@ export default async function UsersLayout({
 
         <div className='mt-6 flex overflow-hidden rounded-lg shadow dark:shadow-gray-700'>
           <ul className='flex flex-col gap-2 bg-gray-100 p-8 text-sm dark:bg-gray-800'>
-            {users.map(user => (
+            {users?.map(user => (
               <li key={user.id}>
                 <Link
                   href={`/users/${user.id}`}
